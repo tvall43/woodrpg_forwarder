@@ -20,7 +20,7 @@
 
 //à
 
-#include <sys/dir.h>
+#include <dirent.h>
 #include <elm.h>
 #define ATTRIB_HID 0x02
 #include "mainlist.h"
@@ -184,11 +184,11 @@ bool cMainList::enterDir( const std::string & dirName )
     }
 
     bool favorites=("favorites:/"==dirName);
-    DIR_ITER* dir=NULL;
+    DIR* dir=NULL;
 
     if(!favorites)
     {
-      dir = diropen( dirName.c_str() );
+      dir = opendir( dirName.c_str() );
 
       if (dir == NULL) {
           if( SD_ROOT == dirName ) {
@@ -217,7 +217,6 @@ bool cMainList::enterDir( const std::string & dirName )
     savNames.push_back( ".sav" );
 
     // insert Ò»¶ÑÎÄ¼þ, Á½ÁÐ£¬Ò»ÁÐ×÷ÎªÏÔÊ¾£¬Ò»ÁÐ×÷ÎªÕæÊµÎÄ¼þÃû
-    struct stat st;
     char longFilename[MAX_FILENAME_LENGTH];
     std::string extName;
     u8 attr=0;
@@ -257,10 +256,11 @@ bool cMainList::enterDir( const std::string & dirName )
         }
         else if(dir)
         {
-          while(dirnext(dir,longFilename,&st)==0)
+          dirent *pent;
+          while((pent=readdir(dir)) != NULL )
           {
-              attr=st.st_spare1;
-              std::string lfn( longFilename );
+              //attr=st.st_spare1;
+              std::string lfn( pent->d_name );
 
               // st.st_mode & S_IFDIR indicates a directory
               size_t lastDotPos = lfn.find_last_of( '.' );
@@ -269,8 +269,8 @@ bool cMainList::enterDir( const std::string & dirName )
               else
                   extName = "";
 
-              dbg_printf( "%s: %s %s\n", (st.st_mode & S_IFDIR ? " DIR" : "FILE"), longFilename, extName.c_str() );
-              bool showThis=(st.st_mode & S_IFDIR)?(strcmp(longFilename,".")&&strcmp(longFilename,"..")):extnameFilter( extNames, extName );
+              dbg_printf( "%s: %s %s\n", (pent->d_type == DT_DIR ? " DIR" : "FILE"), longFilename, extName.c_str() );
+              bool showThis=(pent->d_type == DT_DIR)?(strcmp(longFilename,".")&&strcmp(longFilename,"..")):extnameFilter( extNames, extName );
               showThis=showThis&&(_showAllFiles||gs().showHiddenFiles||!(attr&ATTRIB_HID));
 
               // Èç¹ûÓÐºó×ºÃû£¬»òÕßÊÇ¸öÄ¿Â¼£¬¾Ípush½øÈ¥
@@ -282,7 +282,7 @@ bool cMainList::enterDir( const std::string & dirName )
                   a_row.push_back( "" ); // make a space for internal name
 
                   a_row.push_back(dirName+lfn); //real name
-                  if( st.st_mode & S_IFDIR ) {
+                  if( pent->d_type == DT_DIR) {
                       a_row[SHOWNAME_COLUMN] += "/";
                       a_row[REALNAME_COLUMN] += "/";
                   }
@@ -297,7 +297,7 @@ bool cMainList::enterDir( const std::string & dirName )
                 _saves.push_back(dirName+lfn);
               }
           }
-          dirclose( dir );
+          closedir( dir );
         }
         std::sort( _rows.begin(), _rows.end(), itemSortComp );
         std::sort(_saves.begin(),_saves.end(),stringComp);

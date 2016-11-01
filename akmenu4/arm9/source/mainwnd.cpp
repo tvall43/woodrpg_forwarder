@@ -48,7 +48,7 @@
 #include "iocmn.h"
 #endif
 
-#include <sys/iosupport.h>
+#include <dirent.h>
 #include <elm.h>
 
 using namespace akui;
@@ -564,17 +564,16 @@ void cMainWnd::setParam(void)
   //user interface style
   _values.clear();
   std::vector<std::string> uiNames;
-  DIR_ITER* dir=diropen(SFN_UI_DIRECTORY);
+  DIR* dir=opendir(SFN_UI_DIRECTORY);
   if(NULL!=dir)
   {
-    struct stat st;
-    char longFilename[MAX_FILENAME_LENGTH];
-    while(dirnext(dir,longFilename,&st)==0)
+    struct dirent* pent;
+    while((pent = readdir(dir))!=NULL)
     {
-      std::string lfn(longFilename);
+      std::string lfn(pent->d_name);
       if(lfn!=".."&&lfn!=".") _values.push_back(lfn);
     }
-    dirclose(dir);
+    closedir(dir);
     dir=NULL;
   }
   else
@@ -584,7 +583,7 @@ void cMainWnd::setParam(void)
   std::sort(_values.begin(),_values.end());
   for(size_t ii=0;ii<_values.size();++ii)
   {
-    if(0==stricmp(_values[ii].c_str(),gs().uiName.c_str())) uiIndex=ii;
+    if(0==strcasecmp(_values[ii].c_str(),gs().uiName.c_str())) uiIndex=ii;
   }
   uiNames=_values;
   settingWnd.addSettingItem(LANG("ui style","text"),_values,uiIndex);
@@ -592,17 +591,16 @@ void cMainWnd::setParam(void)
   //language
   _values.clear();
   std::vector<std::string> langNames;
-  dir=diropen(SFN_LANGUAGE_DIRECTORY);
+  dir=opendir(SFN_LANGUAGE_DIRECTORY);
   if(NULL!=dir )
   {
-    struct stat st;
-    char longFilename[MAX_FILENAME_LENGTH];
-    while(dirnext(dir,longFilename,&st)==0)
+    struct dirent* pent;
+    while((pent = readdir(dir))!=NULL)
     {
-      std::string lfn(longFilename);
+      std::string lfn(pent->d_name);
       if(lfn!=".."&&lfn!=".") _values.push_back(lfn);
     }
-    dirclose(dir);
+    closedir(dir);
     dir=NULL;
   }
   else
@@ -612,7 +610,7 @@ void cMainWnd::setParam(void)
   std::sort(_values.begin(),_values.end());
   for(size_t ii=0;ii<_values.size();++ii)
   {
-    if(0==stricmp(_values[ii].c_str(),gs().langDirectory.c_str())) langIndex=ii;
+    if(0==strcasecmp(_values[ii].c_str(),gs().langDirectory.c_str())) langIndex=ii;
   }
   langNames=_values;
   settingWnd.addSettingItem(LANG("language","text"),_values,langIndex);

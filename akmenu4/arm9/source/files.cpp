@@ -20,6 +20,8 @@
 
 #include <nds.h>
 #include <string>
+#include <dirent.h>
+
 #include "files.h"
 //#include "dbgtool.h"
 #include <elm.h>
@@ -422,8 +424,8 @@ bool getDirSize( const std::string & path, bool includeSubdirs, u64 * dirSize )
     if( dirPath.size() > MAX_FILENAME_LENGTH )
         return false;
 
-    DIR_ITER * dir = NULL;
-    dir = diropen(dirPath.c_str());
+    DIR * dir = NULL;
+    dir = opendir(dirPath.c_str());
     if (dir == NULL) {
         //dbg_printf("getDirSize couldn't open dir %s", path.c_str() );
         return false;
@@ -432,17 +434,19 @@ bool getDirSize( const std::string & path, bool includeSubdirs, u64 * dirSize )
     size = 0;
     char filename[MAX_FILENAME_LENGTH];
 
-    struct stat stat_buf;
-    while (dirnext(dir, filename, &stat_buf) == 0) {
+    //struct stat stat_buf;
+    dirent *pent;
 
-        if (strcmp(filename, ".") == 0 || strcmp(filename, "..") == 0) {
+    while ((pent=readdir(dir))!=NULL) {
+
+        if (strcmp(pent->d_name, ".") == 0 || strcmp(pent->d_name, "..") == 0) {
             continue;
         }
 
         //dbg_printf("getDirSize dir entry '%s'", path.c_str());
-        if (!(stat_buf.st_mode & S_IFDIR)) {
+        if (pent->d_type != DT_DIR) {
             //dbg_printf("getDirSize add size %d for '%s'", (int)stat_buf.st_size, path.c_str());
-            size += (u64)stat_buf.st_size;
+            //size += (u64)stat_buf.st_size;
         } else if (includeSubdirs) {
             /* calculate the size recursively */
             u64 subDirSize = 0;
@@ -454,7 +458,7 @@ bool getDirSize( const std::string & path, bool includeSubdirs, u64 * dirSize )
         }
     }
 
-    dirclose(dir);
+    closedir(dir);
     *dirSize = size;
     return true;
 }

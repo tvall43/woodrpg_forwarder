@@ -21,7 +21,7 @@
 #include "ui/binaryfind.h"
 #include "icons.h"
 #include "globalsettings.h"
-#include <sys/dir.h>
+#include <dirent.h>
 #include <elm.h>
 
 cFileIconItem::cFileIconItem(const std::string& aFolderName,const std::string& aFileName):_loaded(false),_foldername(aFolderName),_filename(aFileName)
@@ -67,28 +67,31 @@ cFileIcons::cFileIcons()
 
 void cFileIcons::LoadFolder(cIconPaths& aPaths,const std::string& aFolder)
 {
-  DIR_ITER* dir=diropen(aFolder.c_str());
+  DIR* dir=opendir(aFolder.c_str());
+  dirent* pent;
   if(NULL!=dir)
   {
-    struct stat st;
-    char longFilename[MAX_FILENAME_LENGTH];
-    while(dirnext(dir,longFilename,&st)==0)
+    while((pent=readdir(dir))!=NULL)
     {
-      if((st.st_mode&S_IFDIR)==0)
+      if(pent->d_type == DT_DIR)
       {
-        size_t len=strlen(longFilename);
+
+      }
+      else
+      {
+        size_t len=strlen(pent->d_name);
         if(len>4)
         {
-          char* extName=longFilename+len-4;
+          char* extName=pent->d_name+len-4;
           if(strcasecmp(extName,".bmp")==0)
           {
             *extName=0;
-            aPaths.insert(cFileIconItem(aFolder,longFilename));
+            aPaths.insert(cFileIconItem(aFolder,pent->d_name));
           }
         }
       }
     }
-    dirclose(dir);
+    closedir(dir);
   }
 }
 
