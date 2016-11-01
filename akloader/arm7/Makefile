@@ -36,7 +36,7 @@ CXXFLAGS	:=	$(CFLAGS) -fno-rtti -fno-exceptions -fno-rtti --ansi
 
 
 ASFLAGS	:=	-g $(ARCH)
-LDFLAGS	=	-specs=../../specs/ds_arm7.specs -g $(ARCH) -mno-fpu -Wl,-Map,$(notdir $*).map
+LDFLAGS	=	-specs=../../specs/ds_arm7.specs -g $(ARCH) -Wl,-Map,$(notdir $*).map
 
 LIBS	:=	-lunds7
 
