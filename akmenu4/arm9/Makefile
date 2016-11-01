@@ -38,7 +38,7 @@ CXXFLAGS	:=	$(CFLAGS) -fno-rtti -fno-exceptions
 #--ansi
 
 ASFLAGS	:=	-g $(ARCH) -march=armv5te -mtune=arm946e-s -D_STORAGE_$(STORAGE)
-LDFLAGS	=	-specs=../../specs/ds_arm9.specs -g $(ARCH) -mno-fpu -Wl,-Map,$(notdir $*.map)
+LDFLAGS	=	-specs=ds_arm9.specs -g $(ARCH) -Wl,--section-start,.init=0x02000450,--nmagic $(ARCH) -Wl,-Map,$(notdir $*.map)
 
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
