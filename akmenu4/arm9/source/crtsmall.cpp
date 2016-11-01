@@ -15,11 +15,25 @@
     You should have received a copy of the GNU General Public License
     along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
-
 #include <new>
+#include <stdlib.h>
+
+void* operator new(size_t size)     {   return malloc(size);    }
+
+void operator delete(void *p)       {   free(p);                }
+
+void* operator new[](size_t size)   {   return malloc(size);    }
+
+void operator delete[](void *p)     {   free(p);                }
+
+#if 0
+#include <new>
+#include <stdlib.h>
+
+const std::nothrow_t std::nothrow;
+
 #include <nds.h>
 
-const std::nothrow_t std::nothrow={};
 
 static void Halt(void) __attribute__((__noreturn__));
 
@@ -80,6 +94,7 @@ namespace std
   }
 }
 
+
 extern "C"
 {
   void __gxx_personality_v0(void)
@@ -119,3 +134,5 @@ extern "C"
     Halt();
   }
 }
+
+#endif
