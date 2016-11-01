@@ -26,11 +26,9 @@ DATA		:=	data data/$(STORAGE)
 ARCH	:=	-mthumb -mthumb-interwork
 #
 
-# note: arm9tdmi isn't the correct CPU arch, but anything newer and LD
-# *insists* it has a FPU or VFP, and it won't take no for an answer!
 CFLAGS	:=	-g -Wall -Os\
- 			-march=armv5te -mtune=arm946e-s -fomit-frame-pointer\
-			-ffast-math \
+			-march=armv5te -mtune=arm946e-s \
+			-ffunction-sections -fdata-sections \
 			$(ARCH)
 
 CFLAGS	+=	$(INCLUDE) -DARM9 -fno-dwarf2-cfi-asm -D_STORAGE_$(STORAGE)
