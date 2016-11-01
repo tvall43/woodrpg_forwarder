@@ -36,11 +36,13 @@ distribution.
 #include <nds/interrupts.h>
 #include <nds/fifocommon.h>
 #include <time.h>
+#include <libnds_internal.h>
 
 #include <sys/iosupport.h>
-void __libnds_exit(int rc);
 extern time_t *punixTime;
-extern time_t unixTime;
+
+int __libnds_gtod(struct _reent *ptr, struct timeval *tp, struct timezone *tz);
+void __libnds_exit(int rc);
 
 //---------------------------------------------------------------------------------
 // Reset the DS registers to sensible defaults
@@ -78,9 +80,11 @@ void __attribute__((weak)) initSystem(void) {
 	fifoSetValue32Handler(FIFO_INPUT, inputMsgHandler, 0);
 	fifoSetValue32Handler(FIFO_CLOCK, clockMsgHandler, 0);
 
-	punixTime = (time_t*)&unixTime;
+	punixTime = (time_t*)&__transferRegion()->unixTime;
 
 	__syscalls.exit = __libnds_exit;
+	__syscalls.gettod_r = __libnds_gtod;
+
 	irqEnable(IRQ_VBLANK);
 
 }
