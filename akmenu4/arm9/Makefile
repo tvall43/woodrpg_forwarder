@@ -28,7 +28,7 @@ ARCH	:=	-mthumb -mthumb-interwork
 
 CFLAGS	:=	-g -Wall -Os\
 			-march=armv5te -mtune=arm946e-s \
-			-ffunction-sections -fdata-sections \
+			-ffunction-sections -fdata-sections -std=c++11\
 			$(ARCH)
 
 CFLAGS	+=	$(INCLUDE) -DARM9 -fno-dwarf2-cfi-asm -D_STORAGE_$(STORAGE)
